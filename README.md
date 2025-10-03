@@ -1,7 +1,7 @@
 # Global Supply Chain Analytics
 
 ## Overview
-Analyzed supply chain datasets to provide actionable insights and improve operational efficiency.
+Analyzes supply chain datasets to provide actionable insights, including stock management, shipments, and orders per warehouse.
 
 ## Technologies Used
 Python, Pandas, NumPy, Matplotlib, Seaborn

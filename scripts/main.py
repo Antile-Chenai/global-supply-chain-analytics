@@ -7,41 +7,45 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Sample Inventory Data
+# -------------------------
+# 1. Load Sample Data
+# -------------------------
 inventory = pd.DataFrame({
-    'ProductID': range(1, 11),
-    'Warehouse': ['WH1','WH2','WH1','WH3','WH2','WH1','WH3','WH2','WH1','WH3'],
-    'Stock': [150, 200, 120, 300, 180, 250, 270, 190, 160, 220]
+    'ProductID': range(1, 16),
+    'Warehouse': np.random.choice(['WH1','WH2','WH3'], 15),
+    'Stock': np.random.randint(100,500,15)
 })
 
-# Sample Shipments Data
 shipments = pd.DataFrame({
-    'ShipmentID': range(101, 111),
-    'ProductID': range(1, 11),
-    'QuantityShipped': [50, 70, 60, 120, 80, 90, 110, 60, 70, 100],
-    'Destination': ['NY','CA','TX','NY','CA','TX','NY','CA','TX','NY']
+    'ShipmentID': range(101,116),
+    'ProductID': range(1,16),
+    'QuantityShipped': np.random.randint(20,200,15),
+    'Destination': np.random.choice(['NY','CA','TX'], 15)
 })
 
-# Sample Orders Data
 orders = pd.DataFrame({
-    'OrderID': range(1001,1011),
-    'ProductID': range(1,11),
-    'QuantityOrdered': [40, 60, 50, 100, 70, 80, 90, 50, 60, 95],
-    'OrderDate': pd.date_range('2025-01-01', periods=10)
+    'OrderID': range(1001,1016),
+    'ProductID': range(1,16),
+    'QuantityOrdered': np.random.randint(10,180,15),
+    'OrderDate': pd.date_range('2025-01-01', periods=15)
 })
 
-# Merge datasets
-data = inventory.merge(shipments, on='ProductID').merge(orders, on='ProductID')
+# -------------------------
+# 2. Merge & Clean Data
+# -------------------------
+data = pd.merge(inventory, shipments, on='ProductID')
+data = pd.merge(data, orders, on='ProductID')
+print("Missing values per column:\n", data.isnull().sum())
 
-# Compute stock after shipment and vs orders
 data['StockAfterShipment'] = data['Stock'] - data['QuantityShipped']
 data['StockVsOrder'] = data['StockAfterShipment'] - data['QuantityOrdered']
 
-# Products with stock deficit
+# -------------------------
+# 3. Analytics
+# -------------------------
 low_stock = data[data['StockVsOrder'] < 0]
 print("\nProducts with stock deficit:\n", low_stock[['ProductID','StockVsOrder']])
 
-# Warehouse summary
 warehouse_summary = data.groupby('Warehouse').agg({
     'Stock':'sum',
     'QuantityShipped':'sum',
@@ -49,8 +53,19 @@ warehouse_summary = data.groupby('Warehouse').agg({
 }).reset_index()
 print("\nWarehouse Summary:\n", warehouse_summary)
 
-# Visualization
+total_products = data['ProductID'].nunique()
+total_orders = data['QuantityOrdered'].sum()
+total_shipped = data['QuantityShipped'].sum()
+
+print(f"\nTotal Products: {total_products}")
+print(f"Total Orders: {total_orders}")
+print(f"Total Quantity Shipped: {total_shipped}")
+
+# -------------------------
+# 4. Visualizations
+# -------------------------
 sns.set_style('whitegrid')
+
 plt.figure(figsize=(8,5))
 sns.barplot(x='Warehouse', y='Stock', data=warehouse_summary)
 plt.title('Total Stock per Warehouse')
@@ -69,10 +84,5 @@ if not low_stock.empty:
     plt.title('Products with Stock Deficit')
     plt.savefig('stock_deficit.png')
     plt.close()
-
-# Summary metrics
-print(f"\nTotal Products: {data['ProductID'].nunique()}")
-print(f"Total Orders: {data['QuantityOrdered'].sum()}")
-print(f"Total Quantity Shipped: {data['QuantityShipped'].sum()}")
 
 print("\nGlobal Supply Chain Analytics Project Completed!")
