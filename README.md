@@ -1,21 +1,10 @@
-# Global Supply Chain Analytics
+# global-supply-chain-analytics
 
-## Project Overview
-Analyzed supply chain datasets to provide actionable insights and improve operational efficiency.
+## Overview
+This is the global-supply-chain-analytics project. 
 
-## Technologies Used
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Jupyter Notebook
-
-## Installation
-```bash
-git clone https://github.com/Antile-Chenai/global-supply-chain-analytics.git
-cd global-supply-chain-analytics
-pip install -r requirements.txt
-```
+## Technologies
+Python, Pandas, NumPy, Matplotlib
 
 ## Usage
 ```bash
@@ -23,9 +12,6 @@ python scripts/main.py
 ```
 
 ## Outcome
-- Automated supply chain data cleaning and analysis
-- Generated visualizations to highlight bottlenecks
-- Provided actionable recommendations to improve efficiency
+- Added basic script for demonstration
+- Ready for further development
 
-## License
-MIT License
