@@ -35,9 +35,7 @@ orders = pd.DataFrame({
 # -------------------------
 data = pd.merge(inventory, shipments, on='ProductID')
 data = pd.merge(data, orders, on='ProductID')
-
 print("Missing values per column:\n", data.isnull().sum())
-
 data['StockAfterShipment'] = data['Stock'] - data['QuantityShipped']
 data['StockVsOrder'] = data['StockAfterShipment'] - data['QuantityOrdered']
 
@@ -58,7 +56,6 @@ print("\nWarehouse Summary:\n", warehouse_summary)
 # 4. Visualizations
 # -------------------------
 sns.set_style('whitegrid')
-
 plt.figure(figsize=(8,5))
 sns.barplot(x='Warehouse', y='Stock', data=warehouse_summary)
 plt.title('Total Stock per Warehouse')
@@ -84,8 +81,8 @@ if not low_stock.empty:
 total_products = data['ProductID'].nunique()
 total_orders = data['QuantityOrdered'].sum()
 total_shipped = data['QuantityShipped'].sum()
-
 print(f"\nTotal Products: {total_products}")
 print(f"Total Orders: {total_orders}")
 print(f"Total Quantity Shipped: {total_shipped}")
+
 print("\nGlobal Supply Chain Analytics Project Completed!")
