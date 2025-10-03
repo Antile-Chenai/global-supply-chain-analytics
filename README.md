@@ -9,9 +9,4 @@ Python, Pandas, NumPy, Matplotlib, Seaborn
 ## Scripts
 ```python
 $(cat scripts/main.py)
-E0L
-
-
-
-
 
