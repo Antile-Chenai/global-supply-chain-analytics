@@ -1,22 +1,17 @@
-# global-supply-chain-analytics
+# Global Supply Chain Analytics
 
 ## Overview
-This is the global-supply-chain-analytics project.
+Analyzed supply chain datasets to provide actionable insights and improve operational efficiency.
 
-## Technologies
-Python, Pandas, NumPy, Matplotlib
+## Technologies Used
+Python, Pandas, NumPy, Matplotlib, Seaborn
 
 ## Scripts
 ```python
-print('global-supply-chain-analytics Project')
-```
+$(cat scripts/main.py)
+E0L
 
-## Usage
-```bash
-python scripts/main.py
-```
 
-## Outcome
-- Full project code included
-- Ready for further development
+
+
 

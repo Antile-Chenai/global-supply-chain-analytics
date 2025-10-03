@@ -1,31 +1,84 @@
+# Global Supply Chain Analytics
+# Author: Antile Kaba
+# Date: 2025-10-02
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-np.random.seed(42)
-data = {
-    "Supplier": np.random.choice(["Supplier A", "Supplier B", "Supplier C"], 100),
-    "Region": np.random.choice(["North", "South", "East", "West"], 100),
-    "LeadTimeDays": np.random.randint(1, 30, 100),
-    "UnitsShipped": np.random.randint(10, 500, 100),
-    "Delay": np.random.randint(0, 10, 100)
-}
-df = pd.DataFrame(data)
-df["Delay"] = df["Delay"].apply(lambda x: max(x, 0))
-print(df.head())
-supplier_summary = df.groupby("Supplier").agg({"UnitsShipped":"sum","LeadTimeDays":"mean","Delay":"mean"}).reset_index()
-region_summary = df.groupby("Region").agg({"UnitsShipped":"sum","LeadTimeDays":"mean","Delay":"mean"}).reset_index()
-plt.figure(figsize=(10,6))
-sns.barplot(x="Supplier", y="UnitsShipped", data=supplier_summary)
-plt.savefig("units_by_supplier.png")
+# -------------------------
+# 1. Load Sample Data
+# -------------------------
+inventory = pd.DataFrame({
+    'ProductID': range(1, 11),
+    'Warehouse': ['WH1','WH2','WH1','WH3','WH2','WH1','WH3','WH2','WH1','WH3'],
+    'Stock': [150, 200, 120, 300, 180, 250, 270, 190, 160, 220]
+})
+
+shipments = pd.DataFrame({
+    'ShipmentID': range(101, 111),
+    'ProductID': range(1, 11),
+    'QuantityShipped': [50, 70, 60, 120, 80, 90, 110, 60, 70, 100],
+    'Destination': ['NY','CA','TX','NY','CA','TX','NY','CA','TX','NY']
+})
+
+orders = pd.DataFrame({
+    'OrderID': range(1001,1011),
+    'ProductID': range(1,11),
+    'QuantityOrdered': [40, 60, 50, 100, 70, 80, 90, 50, 60, 95],
+    'OrderDate': pd.date_range('2025-01-01', periods=10)
+})
+
+# -------------------------
+# 2. Data Cleaning & Merge
+# -------------------------
+data = pd.merge(inventory, shipments, on='ProductID')
+data = pd.merge(data, orders, on='ProductID')
+print("Missing values per column:\n", data.isnull().sum())
+data['StockAfterShipment'] = data['Stock'] - data['QuantityShipped']
+data['StockVsOrder'] = data['StockAfterShipment'] - data['QuantityOrdered']
+
+# -------------------------
+# 3. Analytics
+# -------------------------
+low_stock = data[data['StockVsOrder'] < 0]
+print("\nProducts with stock deficit:\n", low_stock[['ProductID','StockVsOrder']])
+warehouse_summary = data.groupby('Warehouse').agg({
+    'Stock': 'sum',
+    'QuantityShipped': 'sum',
+    'QuantityOrdered': 'sum'
+}).reset_index()
+print("\nWarehouse Summary:\n", warehouse_summary)
+
+# -------------------------
+# 4. Visualization
+# -------------------------
+sns.set_style('whitegrid')
+plt.figure(figsize=(8,5))
+sns.barplot(x='Warehouse', y='Stock', data=warehouse_summary)
+plt.title('Total Stock per Warehouse')
+plt.savefig('stock_per_warehouse.png')
 plt.close()
-plt.figure(figsize=(10,6))
-sns.barplot(x="Region", y="UnitsShipped", data=region_summary)
-plt.savefig("units_by_region.png")
+plt.figure(figsize=(8,5))
+warehouse_summary.plot(x='Warehouse', y=['QuantityShipped','QuantityOrdered'], kind='bar')
+plt.title('Shipments vs Orders per Warehouse')
+plt.savefig('shipments_vs_orders.png')
 plt.close()
-plt.figure(figsize=(10,6))
-sns.scatterplot(x="LeadTimeDays", y="Delay", hue="Supplier", data=df)
-plt.savefig("leadtime_vs_delay.png")
-plt.close()
-print("Analysis complete. Plots saved.")
+if not low_stock.empty:
+    plt.figure(figsize=(8,5))
+    sns.barplot(x='ProductID', y='StockVsOrder', data=low_stock)
+    plt.title('Products with Stock Deficit')
+    plt.savefig('stock_deficit.png')
+    plt.close()
+
+# -------------------------
+# 5. Summary Metrics
+# -------------------------
+total_products = data['ProductID'].nunique()
+total_orders = data['QuantityOrdered'].sum()
+total_shipped = data['QuantityShipped'].sum()
+print(f"\nTotal Products: {total_products}")
+print(f"Total Orders: {total_orders}")
+print(f"Total Quantity Shipped: {total_shipped}")
+print("\nGlobal Supply Chain Analytics Project Completed!")
