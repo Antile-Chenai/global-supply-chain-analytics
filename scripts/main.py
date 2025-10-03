@@ -7,15 +7,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# -------------------------
-# 1. Load Sample Data
-# -------------------------
+# Sample Inventory Data
 inventory = pd.DataFrame({
     'ProductID': range(1, 11),
     'Warehouse': ['WH1','WH2','WH1','WH3','WH2','WH1','WH3','WH2','WH1','WH3'],
     'Stock': [150, 200, 120, 300, 180, 250, 270, 190, 160, 220]
 })
 
+# Sample Shipments Data
 shipments = pd.DataFrame({
     'ShipmentID': range(101, 111),
     'ProductID': range(1, 11),
@@ -23,6 +22,7 @@ shipments = pd.DataFrame({
     'Destination': ['NY','CA','TX','NY','CA','TX','NY','CA','TX','NY']
 })
 
+# Sample Orders Data
 orders = pd.DataFrame({
     'OrderID': range(1001,1011),
     'ProductID': range(1,11),
@@ -30,31 +30,26 @@ orders = pd.DataFrame({
     'OrderDate': pd.date_range('2025-01-01', periods=10)
 })
 
-# -------------------------
-# 2. Data Cleaning & Merge
-# -------------------------
-data = pd.merge(inventory, shipments, on='ProductID')
-data = pd.merge(data, orders, on='ProductID')
-print("Missing values per column:\n", data.isnull().sum())
+# Merge datasets
+data = inventory.merge(shipments, on='ProductID').merge(orders, on='ProductID')
+
+# Compute stock after shipment and vs orders
 data['StockAfterShipment'] = data['Stock'] - data['QuantityShipped']
 data['StockVsOrder'] = data['StockAfterShipment'] - data['QuantityOrdered']
 
-# -------------------------
-# 3. Analytics
-# -------------------------
+# Products with stock deficit
 low_stock = data[data['StockVsOrder'] < 0]
 print("\nProducts with stock deficit:\n", low_stock[['ProductID','StockVsOrder']])
 
+# Warehouse summary
 warehouse_summary = data.groupby('Warehouse').agg({
-    'Stock': 'sum',
-    'QuantityShipped': 'sum',
-    'QuantityOrdered': 'sum'
+    'Stock':'sum',
+    'QuantityShipped':'sum',
+    'QuantityOrdered':'sum'
 }).reset_index()
 print("\nWarehouse Summary:\n", warehouse_summary)
 
-# -------------------------
-# 4. Visualizations
-# -------------------------
+# Visualization
 sns.set_style('whitegrid')
 plt.figure(figsize=(8,5))
 sns.barplot(x='Warehouse', y='Stock', data=warehouse_summary)
@@ -75,14 +70,9 @@ if not low_stock.empty:
     plt.savefig('stock_deficit.png')
     plt.close()
 
-# -------------------------
-# 5. Summary Metrics
-# -------------------------
-total_products = data['ProductID'].nunique()
-total_orders = data['QuantityOrdered'].sum()
-total_shipped = data['QuantityShipped'].sum()
-print(f"\nTotal Products: {total_products}")
-print(f"Total Orders: {total_orders}")
-print(f"Total Quantity Shipped: {total_shipped}")
+# Summary metrics
+print(f"\nTotal Products: {data['ProductID'].nunique()}")
+print(f"Total Orders: {data['QuantityOrdered'].sum()}")
+print(f"Total Quantity Shipped: {data['QuantityShipped'].sum()}")
 
 print("\nGlobal Supply Chain Analytics Project Completed!")
